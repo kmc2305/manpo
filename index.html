@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/manpo/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="manpo">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>manpo</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    let _handler = null;
+
+    async function requestMotionPermission() {
+      if (
+        typeof DeviceMotionEvent !== "undefined" &&
+        typeof DeviceMotionEvent.requestPermission === "function"
+      ) {
+        const res = await DeviceMotionEvent.requestPermission();
+        if (res !== "granted") throw new Error("Motion permission denied");
+      }
+    }
+
+    function startMotion(onData) {
+      stopMotion();
+      _handler = (e) => {
+        const a = e.accelerationIncludingGravity;
+        if (!a) return;
+        onData(a.x ?? 0, a.y ?? 0, a.z ?? 0, Date.now());
+      };
+      window.addEventListener("devicemotion", _handler, { passive: true });
+    }
+
+    function stopMotion() {
+      if (_handler) {
+        window.removeEventListener("devicemotion", _handler);
+        _handler = null;
+      }
+    }
+
+    window.ManpoKei = {
+      requestMotionPermission,
+      startMotion,
+      stopMotion
+    };
+  </script>
+</body>
+</html>
